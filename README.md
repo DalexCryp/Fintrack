@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FinTrack
 
-## Getting Started
+A personal finance dashboard: track income and expenses by hand, and follow a stock portfolio valued at live Yahoo Finance quotes.
 
-First, run the development server:
+**Stack:** Next.js 16 (App Router, TypeScript) · Tailwind CSS 4 + shadcn/ui · SQLite via Prisma 6 · `yahoo-finance2` (no API key) · Recharts
+
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install          # also runs `prisma generate`
+npm run db:migrate   # creates prisma/dev.db
+npm run db:seed      # optional: six months of sample data + 4 holdings (wipes existing data)
+npm run dev          # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+> npm 11.19+ blocks dependency install scripts unless they're allowlisted. The ones this project needs (Prisma engines, esbuild, unrs-resolver) are listed under `allowScripts` in `package.json`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Pages
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Route | What it does |
+|---|---|
+| `/` | Net worth (tracked cash + portfolio), this month's income/expenses/net, 12-month cash-flow chart, spending by category, portfolio allocation, recent transactions |
+| `/transactions` | Full list filterable by type, category, and month; add, edit, and delete |
+| `/portfolio` | Holdings with live price, day change, market value, and weight; add (adding an existing ticker adds to its shares), edit shares, remove, refresh prices |
 
-## Learn More
+## Notes
 
-To learn more about Next.js, take a look at the following resources:
+- **Quotes** are fetched server-side in one batched request and cached in memory for 5 minutes (`src/lib/quotes.ts`). "Refresh prices" bypasses the cache. Tickers are checked against Yahoo before they're saved. If Yahoo is unreachable, the page still renders and unpriced holdings are left out of totals.
+- **Dates** are stored at 12:00 UTC on the chosen day, so a transaction shows up on the same calendar day in any timezone.
+- **Currency** is displayed as USD. Holdings quoted in another currency show prices in that currency, but totals add them up without converting.
+- **Mutations** use server actions (`src/app/actions/`) with zod validation.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Scripts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`dev` · `build` · `start` · `lint` · `typecheck` · `db:migrate` · `db:seed` · `db:studio`
